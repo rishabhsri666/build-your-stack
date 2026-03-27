@@ -1,0 +1,61 @@
+// src/utils/useCaseTemplates.js
+
+export const useCaseTemplates = [
+  {
+    id: 'saas',
+    name: 'SaaS Application',
+    emoji: '🚀',
+    requires: { frontend: true, backend: true, database: true, auth: true },
+    description: 'Multi-tenant web application with user accounts, billing, and dashboards.',
+    examples: ['Project management tools', 'CRM software', 'Analytics dashboards'],
+  },
+  {
+    id: 'realtime',
+    name: 'Real-time Application',
+    emoji: '⚡',
+    matchComponents: ['firebase', 'supabase', 'nodejs'],
+    description: 'Live-updating data — chat apps, collaboration tools, live dashboards.',
+    examples: ['Chat application', 'Collaborative editor', 'Live sports scores'],
+  },
+  {
+    id: 'ecommerce',
+    name: 'E-Commerce Platform',
+    emoji: '🛍️',
+    requires: { database: true, auth: true, hosting: true },
+    matchComponents: ['postgresql', 'nextjs'],
+    description: 'Product listings, cart, checkout, and order management.',
+    examples: ['Online store', 'Marketplace', 'Digital product shop'],
+  },
+  {
+    id: 'portfolio',
+    name: 'Portfolio / Marketing Site',
+    emoji: '🎨',
+    matchComponents: ['react', 'vue', 'svelte', 'nextjs', 'netlify', 'vercel'],
+    description: 'Static or SSR site with fast load times and great SEO.',
+    examples: ['Developer portfolio', 'Agency website', 'Landing page'],
+  },
+  {
+    id: 'api',
+    name: 'REST / GraphQL API',
+    emoji: '🔌',
+    matchComponents: ['nodejs', 'express', 'fastapi', 'django', 'postgresql', 'mongodb'],
+    description: 'Headless backend serving data to multiple clients.',
+    examples: ['Mobile app backend', 'Public API', 'Microservice'],
+  },
+  {
+    id: 'mvp',
+    name: 'Startup MVP',
+    emoji: '🌱',
+    matchComponents: ['react', 'firebase', 'firebase-auth', 'vercel', 'netlify'],
+    description: 'Ship fast with minimal infrastructure. Focus on product, not ops.',
+    examples: ['Idea validation', 'Beta launch', 'Hackathon project'],
+  },
+  {
+    id: 'enterprise',
+    name: 'Enterprise Application',
+    emoji: '🏢',
+    matchComponents: ['aws', 'postgresql', 'auth0', 'django', 'fastapi'],
+    description: 'Scalable, secure, and compliant system for large organisations.',
+    examples: ['Internal tools', 'HR systems', 'Finance platforms'],
+  },
+]
