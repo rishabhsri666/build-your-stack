@@ -15,7 +15,7 @@ import CanvasToolbar from './CanvasToolbar'
 
 const nodeTypes = { stackNode: StackNode }
 
-export default function StackCanvas({ store, onSave, saving, readOnly = false }) {
+export default function StackCanvas({ store, onSave, onExport, onTemplates, saving, exporting, readOnly = false }) {
   const reactFlowWrapper = useRef(null)
   const [reactFlowInstance, setReactFlowInstance] = useState(null)
   const [isDragOver, setIsDragOver] = useState(false)
@@ -56,8 +56,11 @@ export default function StackCanvas({ store, onSave, saving, readOnly = false })
         <CanvasToolbar
           onClear={clearCanvas}
           onSave={onSave}
+          onExport={onExport}
+          onTemplates={onTemplates}
           nodeCount={nodes.length}
           saving={saving}
+          exporting={exporting}
         />
       )}
 
