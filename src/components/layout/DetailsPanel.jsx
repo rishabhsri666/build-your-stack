@@ -1,58 +1,92 @@
 // src/components/layout/DetailsPanel.jsx
 import { useStackAnalysis } from '../../hooks/useStackAnalysis'
+import { useAiAnalysis } from '../../hooks/useAiAnalysis'
+import AiAnalyzeButton from '../ui/AiAnalyzeButton'
+import AiAnalysisResult from '../ui/AiAnalysisResult'
 import clsx from 'clsx'
 
 // ── Sub-components ────────────────────────────────────────────────────────────
 
-function Section({ title, children }) {
+function SectionHeader({ title }) {
   return (
-    <div className="border border-gray-800 rounded-xl overflow-hidden">
-      <div className="px-3 py-2 bg-gray-800/60 border-b border-gray-800">
-        <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest">
-          {title}
-        </p>
-      </div>
-      <div className="p-3">{children}</div>
+    <p
+      className="text-[10px] font-semibold uppercase tracking-[0.12em] mb-2.5 px-1"
+      style={{ color: 'var(--color-text-subtle)' }}
+    >
+      {title}
+    </p>
+  )
+}
+
+function Card({ children }) {
+  return (
+    <div
+      className="rounded-xl p-3"
+      style={{
+        background: 'var(--color-surface-2)',
+        border: '1px solid var(--color-border)',
+      }}
+    >
+      {children}
     </div>
   )
 }
 
 function ComplexityBar({ complexity }) {
   return (
-    <div className="flex items-center gap-3">
-      <div className="flex-1 h-1.5 bg-gray-800 rounded-full overflow-hidden">
+    <Card>
+      <div className="flex items-center justify-between mb-2">
+        <span className="text-xs text-white font-medium">Stack Complexity</span>
+        <span
+          className="text-xs font-bold px-2 py-0.5 rounded-full"
+          style={{
+            background: `${complexity.color}18`,
+            color: complexity.color,
+            border: `1px solid ${complexity.color}30`,
+          }}
+        >
+          {complexity.label}
+        </span>
+      </div>
+      <div
+        className="h-1.5 rounded-full overflow-hidden"
+        style={{ background: 'var(--color-border)' }}
+      >
         <div
-          className="h-full rounded-full transition-all duration-500"
+          className="h-full rounded-full transition-all duration-700 ease-out"
           style={{
             width: `${(complexity.score / 10) * 100}%`,
-            backgroundColor: complexity.color,
+            background: `linear-gradient(90deg, ${complexity.color}99, ${complexity.color})`,
           }}
         />
       </div>
-      <span
-        className="text-xs font-semibold"
-        style={{ color: complexity.color }}
-      >
-        {complexity.label}
-      </span>
+    </Card>
+  )
+}
+
+function WarningItem({ warning }) {
+  const isConflict = warning.severity === 'warning'
+  return (
+    <div
+      className="flex items-start gap-2.5 px-3 py-2.5 rounded-lg text-xs leading-relaxed"
+      style={{
+        background: isConflict ? 'rgba(239,68,68,0.06)' : 'rgba(245,158,11,0.06)',
+        border: `1px solid ${isConflict ? 'rgba(239,68,68,0.2)' : 'rgba(245,158,11,0.2)'}`,
+        color: isConflict ? '#fca5a5' : '#fcd34d',
+      }}
+    >
+      <span className="flex-shrink-0 mt-0.5">{isConflict ? '⚠' : '💡'}</span>
+      <span>{warning.message}</span>
     </div>
   )
 }
 
-function WarningBadge({ warning }) {
-  const isConflict = warning.severity === 'warning'
+function Divider() {
   return (
     <div
-      className={clsx(
-        'flex items-start gap-2 px-3 py-2 rounded-lg text-xs',
-        isConflict
-          ? 'bg-red-950/50 border border-red-900/50 text-red-300'
-          : 'bg-amber-950/50 border border-amber-900/50 text-amber-300'
-      )}
-    >
-      <span className="mt-0.5 flex-shrink-0">{isConflict ? '⚠️' : '💡'}</span>
-      <span className="leading-relaxed">{warning.message}</span>
-    </div>
+      className="my-4 h-px w-full"
+      style={{ background: 'var(--color-border)' }}
+    />
   )
 }
 
@@ -60,165 +94,289 @@ function WarningBadge({ warning }) {
 
 export default function DetailsPanel({ nodes = [], edges = [] }) {
   const analysis = useStackAnalysis(nodes, edges)
+  const { analyze, status, result, error, cooldown, reset } = useAiAnalysis()
 
-  if (analysis.isEmpty) {
-    return (
-      <aside className="w-72 h-full bg-gray-900 border-l border-gray-800 flex flex-col">
-        <PanelHeader />
-        <div className="flex-1 flex items-center justify-center px-4">
-          <div className="text-center">
-            <p className="text-4xl mb-3">📊</p>
-            <p className="text-sm text-gray-500 leading-relaxed">
-              Drag components onto the canvas to see your stack analysis here.
-            </p>
-          </div>
-        </div>
-      </aside>
-    )
+  const handleAnalyze = () => {
+    analyze(nodes, edges, analysis)
   }
 
   return (
-    <aside className="w-72 h-full bg-gray-900 border-l border-gray-800 flex flex-col">
-      <PanelHeader />
+    <aside
+      className="w-72 h-full flex flex-col overflow-hidden animate-slide-right"
+      style={{
+        background: 'var(--color-surface)',
+        borderLeft: '1px solid var(--color-border)',
+      }}
+    >
+      {/* Header */}
+      <div
+        className="px-4 py-4 flex-shrink-0"
+        style={{ borderBottom: '1px solid var(--color-border)' }}
+      >
+        <h2
+          className="text-sm font-bold text-white"
+          style={{ fontFamily: 'var(--font-display)' }}
+        >
+          Stack Analysis
+        </h2>
+        <p className="text-xs mt-0.5" style={{ color: 'var(--color-text-muted)' }}>
+          {analysis.isEmpty
+            ? 'Add components to see insights'
+            : `${nodes.length} component${nodes.length !== 1 ? 's' : ''} · ${edges.length} connection${edges.length !== 1 ? 's' : ''}`}
+        </p>
+      </div>
 
-      <div className="flex-1 overflow-y-auto px-3 py-4 space-y-3">
-
-        {/* Complexity */}
-        <Section title="Complexity">
-          <ComplexityBar complexity={analysis.complexity} />
-          <p className="text-xs text-gray-500 mt-2">
-            {nodes.length} component{nodes.length !== 1 ? 's' : ''} ·{' '}
-            {edges.length} connection{edges.length !== 1 ? 's' : ''}
-          </p>
-        </Section>
-
-        {/* Architecture Description */}
-        {analysis.architecture && (
-          <Section title="Architecture">
-            <p className="text-xs text-gray-300 leading-relaxed">
-              {/* Render **bold** markers */}
-              {analysis.architecture.split(/\*\*(.*?)\*\*/g).map((part, i) =>
-                i % 2 === 1
-                  ? <strong key={i} className="text-white font-semibold">{part}</strong>
-                  : <span key={i}>{part}</span>
-              )}
-            </p>
-          </Section>
-        )}
-
-        {/* Warnings & Suggestions */}
-        {analysis.warnings.length > 0 && (
-          <Section title="Warnings & Suggestions">
-            <div className="space-y-2">
-              {analysis.warnings.map((w, i) => (
-                <WarningBadge key={i} warning={w} />
-              ))}
+      {/* Empty state */}
+      {analysis.isEmpty ? (
+        <div className="flex-1 flex items-center justify-center px-5">
+          <div className="text-center animate-fade-up">
+            <div
+              className="w-14 h-14 rounded-2xl mx-auto mb-4 flex items-center justify-center text-2xl"
+              style={{
+                background: 'var(--color-surface-2)',
+                border: '1px solid var(--color-border)',
+              }}
+            >
+              📊
             </div>
-          </Section>
-        )}
+            <p className="text-sm font-medium text-white mb-1.5">No stack yet</p>
+            <p
+              className="text-xs leading-relaxed"
+              style={{ color: 'var(--color-text-subtle)' }}
+            >
+              Drag components onto the canvas to get architecture insights and AI-powered recommendations.
+            </p>
+          </div>
+        </div>
+      ) : (
+        <div className="flex-1 overflow-y-auto px-3 py-4 space-y-5">
 
-        {/* Pros */}
-        {analysis.pros.length > 0 && (
-          <Section title="Strengths">
-            <ul className="space-y-1.5">
-              {analysis.pros.map((pro, i) => (
-                <li key={i} className="flex items-start gap-2 text-xs text-gray-300">
-                  <span className="text-emerald-400 mt-0.5 flex-shrink-0">✓</span>
-                  <span className="leading-relaxed">
-                    {pro.text}
-                    <span className="text-gray-600 ml-1">({pro.source})</span>
-                  </span>
-                </li>
-              ))}
-            </ul>
-          </Section>
-        )}
+          {/* ── STATIC ANALYSIS ── */}
 
-        {/* Cons */}
-        {analysis.cons.length > 0 && (
-          <Section title="Trade-offs">
-            <ul className="space-y-1.5">
-              {analysis.cons.map((con, i) => (
-                <li key={i} className="flex items-start gap-2 text-xs text-gray-300">
-                  <span className="text-red-400 mt-0.5 flex-shrink-0">✗</span>
-                  <span className="leading-relaxed">
-                    {con.text}
-                    <span className="text-gray-600 ml-1">({con.source})</span>
-                  </span>
-                </li>
-              ))}
-            </ul>
-          </Section>
-        )}
+          {/* Complexity */}
+          <div className="animate-fade-up stagger-1">
+            <ComplexityBar complexity={analysis.complexity} />
+          </div>
 
-        {/* Use Cases */}
-        {analysis.useCases.length > 0 && (
-          <Section title="Best For">
-            <div className="space-y-2">
-              {analysis.useCases.map((uc) => (
-                <div
-                  key={uc.id}
-                  className="bg-gray-800/60 rounded-lg p-2.5 border border-gray-700/50"
+          {/* Architecture */}
+          {analysis.architecture && (
+            <div className="animate-fade-up stagger-2">
+              <SectionHeader title="Architecture" />
+              <Card>
+                <p
+                  className="text-xs leading-relaxed"
+                  style={{ color: 'var(--color-text-muted)' }}
                 >
-                  <div className="flex items-center gap-2 mb-1">
-                    <span className="text-base">{uc.emoji}</span>
-                    <span className="text-xs font-semibold text-white">{uc.name}</span>
+                  {analysis.architecture.split(/\*\*(.*?)\*\*/g).map((part, i) =>
+                    i % 2 === 1
+                      ? <strong key={i} className="text-white font-semibold">{part}</strong>
+                      : <span key={i}>{part}</span>
+                  )}
+                </p>
+              </Card>
+            </div>
+          )}
+
+          {/* Warnings */}
+          {analysis.warnings.length > 0 && (
+            <div className="animate-fade-up stagger-2">
+              <SectionHeader title="Warnings & Tips" />
+              <div className="space-y-2">
+                {analysis.warnings.map((w, i) => (
+                  <WarningItem key={i} warning={w} />
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Pros */}
+          {analysis.pros.length > 0 && (
+            <div className="animate-fade-up stagger-3">
+              <SectionHeader title="Strengths" />
+              <Card>
+                <ul className="space-y-2">
+                  {analysis.pros.map((pro, i) => (
+                    <li key={i} className="flex items-start gap-2 text-xs">
+                      <span className="text-emerald-400 flex-shrink-0 mt-0.5 font-bold">✓</span>
+                      <span style={{ color: 'var(--color-text-muted)' }}>
+                        {pro.text}
+                        <span className="ml-1 text-[10px]" style={{ color: 'var(--color-text-subtle)' }}>
+                          ({pro.source})
+                        </span>
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              </Card>
+            </div>
+          )}
+
+          {/* Cons */}
+          {analysis.cons.length > 0 && (
+            <div className="animate-fade-up stagger-3">
+              <SectionHeader title="Trade-offs" />
+              <Card>
+                <ul className="space-y-2">
+                  {analysis.cons.map((con, i) => (
+                    <li key={i} className="flex items-start gap-2 text-xs">
+                      <span className="text-red-400 flex-shrink-0 mt-0.5 font-bold">✗</span>
+                      <span style={{ color: 'var(--color-text-muted)' }}>
+                        {con.text}
+                        <span className="ml-1 text-[10px]" style={{ color: 'var(--color-text-subtle)' }}>
+                          ({con.source})
+                        </span>
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              </Card>
+            </div>
+          )}
+
+          {/* Use cases */}
+          {analysis.useCases.length > 0 && (
+            <div className="animate-fade-up stagger-4">
+              <SectionHeader title="Best For" />
+              <div className="space-y-2">
+                {analysis.useCases.map((uc) => (
+                  <div
+                    key={uc.id}
+                    className="rounded-xl p-3"
+                    style={{
+                      background: 'var(--color-surface-2)',
+                      border: '1px solid var(--color-border)',
+                    }}
+                  >
+                    <div className="flex items-center gap-2 mb-1.5">
+                      <span className="text-base">{uc.emoji}</span>
+                      <span className="text-xs font-semibold text-white">{uc.name}</span>
+                    </div>
+                    <p
+                      className="text-xs leading-relaxed mb-2"
+                      style={{ color: 'var(--color-text-muted)' }}
+                    >
+                      {uc.description}
+                    </p>
+                    <div className="flex flex-wrap gap-1">
+                      {uc.examples.map((ex) => (
+                        <span
+                          key={ex}
+                          className="text-[10px] px-2 py-0.5 rounded-full"
+                          style={{
+                            background: 'rgba(99,102,241,0.1)',
+                            border: '1px solid rgba(99,102,241,0.2)',
+                            color: '#a5b4fc',
+                          }}
+                        >
+                          {ex}
+                        </span>
+                      ))}
+                    </div>
                   </div>
-                  <p className="text-xs text-gray-400 leading-relaxed mb-1.5">
-                    {uc.description}
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Layer breakdown */}
+          <div className="animate-fade-up stagger-5">
+            <SectionHeader title="Layer Breakdown" />
+            <Card>
+              {Object.entries(analysis.grouped).map(([type, comps]) => (
+                <div key={type} className="mb-3 last:mb-0">
+                  <p
+                    className="text-[9px] font-semibold uppercase tracking-widest mb-1.5"
+                    style={{ color: 'var(--color-text-subtle)' }}
+                  >
+                    {type}
                   </p>
-                  <div className="flex flex-wrap gap-1">
-                    {uc.examples.map((ex) => (
+                  <div className="flex flex-wrap gap-1.5">
+                    {comps.map((c) => (
                       <span
-                        key={ex}
-                        className="text-[10px] px-1.5 py-0.5 bg-gray-700 text-gray-300 rounded"
+                        key={c.nodeId}
+                        className="flex items-center gap-1 text-[11px] px-2 py-1 rounded-lg"
+                        style={{
+                          background: `${c.color}12`,
+                          border: `1px solid ${c.color}30`,
+                          color: c.color,
+                        }}
                       >
-                        {ex}
+                        {c.emoji} {c.label}
                       </span>
                     ))}
                   </div>
                 </div>
               ))}
-            </div>
-          </Section>
-        )}
+            </Card>
+          </div>
 
-        {/* Stack composition by layer */}
-        <Section title="Stack Layers">
-          {Object.entries(analysis.grouped).map(([type, comps]) => (
-            <div key={type} className="mb-2 last:mb-0">
-              <p className="text-[10px] font-semibold text-gray-600 uppercase tracking-widest mb-1">
-                {type}
-              </p>
-              <div className="flex flex-wrap gap-1">
-                {comps.map((c) => (
-                  <span
-                    key={c.nodeId}
-                    className="flex items-center gap-1 text-xs px-2 py-0.5 rounded-full border"
-                    style={{
-                      backgroundColor: `${c.color}15`,
-                      borderColor: `${c.color}40`,
-                      color: c.color,
-                    }}
-                  >
-                    {c.emoji} {c.label}
-                  </span>
-                ))}
+          {/* ── AI SECTION DIVIDER ── */}
+          <Divider />
+
+          {/* AI Trigger or Result */}
+          <div className="space-y-4 animate-fade-up stagger-6">
+
+            {/* Error state */}
+            {status === 'error' && error && (
+              <div
+                className="text-xs px-3 py-2.5 rounded-lg"
+                style={{
+                  background: 'rgba(239,68,68,0.08)',
+                  border: '1px solid rgba(239,68,68,0.2)',
+                  color: '#fca5a5',
+                }}
+              >
+                {error}
               </div>
-            </div>
-          ))}
-        </Section>
+            )}
 
-      </div>
+            {/* Show result OR the analyze button */}
+            {status === 'success' && result ? (
+              <AiAnalysisResult result={result} onReset={reset} />
+            ) : (
+              <div className="space-y-3">
+                <div
+                  className="rounded-xl p-3 text-center"
+                  style={{
+                    background: 'rgba(99,102,241,0.04)',
+                    border: '1px dashed rgba(99,102,241,0.2)',
+                  }}
+                >
+                  <p
+                    className="text-xs font-medium mb-1"
+                    style={{ color: '#a5b4fc' }}
+                  >
+                    ✦ AI-Powered Insights
+                  </p>
+                  <p
+                    className="text-[11px] leading-relaxed"
+                    style={{ color: 'var(--color-text-subtle)' }}
+                  >
+                    Get contextual architecture analysis, scalability assessment, and personalized learning recommendations for your exact stack.
+                  </p>
+                </div>
+
+                <AiAnalyzeButton
+                  onClick={handleAnalyze}
+                  status={status}
+                  cooldown={cooldown}
+                  disabled={analysis.isEmpty}
+                />
+
+                {cooldown && (
+                  <p
+                    className="text-[10px] text-center"
+                    style={{ color: 'var(--color-text-subtle)' }}
+                  >
+                    Next analysis available in 30s
+                  </p>
+                )}
+              </div>
+            )}
+          </div>
+
+        </div>
+      )}
     </aside>
-  )
-}
-
-function PanelHeader() {
-  return (
-    <div className="px-4 py-5 border-b border-gray-800 flex-shrink-0">
-      <h2 className="text-sm font-semibold text-white">Stack Analysis</h2>
-      <p className="text-xs text-gray-500 mt-0.5">Live insights as you build</p>
-    </div>
   )
 }
