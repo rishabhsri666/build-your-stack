@@ -111,12 +111,21 @@ export default function Sidebar() {
 
       {/* Footer */}
       <div
-        className="px-4 py-3 flex-shrink-0 flex items-center justify-between"
+        className="px-4 py-3 flex-shrink-0 flex items-center justify-between gap-2"
         style={{ borderTop: '1px solid var(--color-border)' }}
       >
-        <p className="text-[10px]" style={{ color: 'var(--color-text-subtle)' }}>
+        {/* <p className="text-[10px]" style={{ color: 'var(--color-text-subtle)' }}>
           Drag to canvas to build
-        </p>
+        </p> */}
+        <Link
+          to="/my-stacks"
+          className="text-[10px] font-medium transition-colors"
+          style={{ color: 'var(--color-text-muted)' }}
+          onMouseEnter={(e) => { e.currentTarget.style.color = '#a5b4fc' }}
+          onMouseLeave={(e) => { e.currentTarget.style.color = 'var(--color-text-muted)' }}
+        >
+          📁 My Stacks
+        </Link>
         <Link
           to="/compare"
           className="text-[10px] font-medium transition-colors"
