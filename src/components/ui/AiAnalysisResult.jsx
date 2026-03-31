@@ -1,5 +1,4 @@
 // src/components/ui/AiAnalysisResult.jsx
-import clsx from 'clsx'
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 

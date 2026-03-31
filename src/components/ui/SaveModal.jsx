@@ -1,6 +1,5 @@
 // src/components/ui/SaveModal.jsx
 import { useState } from 'react'
-import clsx from 'clsx'
 
 export default function SaveModal({ onSave, onClose, saving, error }) {
   const [title, setTitle] = useState('')

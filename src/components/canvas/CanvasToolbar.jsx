@@ -1,11 +1,11 @@
 // src/components/canvas/CanvasToolbar.jsx
-import clsx from 'clsx'
-
 export default function CanvasToolbar({
   onClear,
   onSave,
   onExport,
   onTemplates,
+  onDelete,
+  savedId,
   nodeCount,
   saving,
   exporting,
@@ -86,10 +86,22 @@ export default function CanvasToolbar({
                 />
                 Saving...
               </>
+            ) : savedId ? (
+              '🔁 Update'
             ) : (
               '💾 Save & Share'
             )}
           </button>
+
+          {savedId && (
+            <ToolbarButton
+              onClick={onDelete}
+              hoverColor="rgba(239,68,68,0.1)"
+              hoverTextColor="#f87171"
+            >
+              🗑️ Delete
+            </ToolbarButton>
+          )}
 
           {/* Clear */}
           <ToolbarButton

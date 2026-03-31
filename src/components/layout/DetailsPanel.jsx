@@ -3,7 +3,6 @@ import { useStackAnalysis } from '../../hooks/useStackAnalysis'
 import { useAiAnalysis } from '../../hooks/useAiAnalysis'
 import AiAnalyzeButton from '../ui/AiAnalyzeButton'
 import AiAnalysisResult from '../ui/AiAnalysisResult'
-import clsx from 'clsx'
 
 // ── Sub-components ────────────────────────────────────────────────────────────
 
@@ -92,7 +91,7 @@ function Divider() {
 
 // ── Main Panel ────────────────────────────────────────────────────────────────
 
-export default function DetailsPanel({ nodes = [], edges = [] }) {
+export default function DetailsPanel({ nodes = [], edges = [], readOnly = false }) {
   const analysis = useStackAnalysis(nodes, edges)
   const { analyze, status, result, error, cooldown, reset } = useAiAnalysis()
 
@@ -310,70 +309,74 @@ export default function DetailsPanel({ nodes = [], edges = [] }) {
             </Card>
           </div>
 
-          {/* ── AI SECTION DIVIDER ── */}
-          <Divider />
+          {!readOnly && (
+            <>
+              {/* ── AI SECTION DIVIDER ── */}
+              <Divider />
 
-          {/* AI Trigger or Result */}
-          <div className="space-y-4 animate-fade-up stagger-6">
+              {/* AI Trigger or Result */}
+              <div className="space-y-4 animate-fade-up stagger-6">
 
-            {/* Error state */}
-            {status === 'error' && error && (
-              <div
-                className="text-xs px-3 py-2.5 rounded-lg"
-                style={{
-                  background: 'rgba(239,68,68,0.08)',
-                  border: '1px solid rgba(239,68,68,0.2)',
-                  color: '#fca5a5',
-                }}
-              >
-                {error}
-              </div>
-            )}
-
-            {/* Show result OR the analyze button */}
-            {status === 'success' && result ? (
-              <AiAnalysisResult result={result} onReset={reset} />
-            ) : (
-              <div className="space-y-3">
-                <div
-                  className="rounded-xl p-3 text-center"
-                  style={{
-                    background: 'rgba(99,102,241,0.04)',
-                    border: '1px dashed rgba(99,102,241,0.2)',
-                  }}
-                >
-                  <p
-                    className="text-xs font-medium mb-1"
-                    style={{ color: '#a5b4fc' }}
+                {/* Error state */}
+                {status === 'error' && error && (
+                  <div
+                    className="text-xs px-3 py-2.5 rounded-lg"
+                    style={{
+                      background: 'rgba(239,68,68,0.08)',
+                      border: '1px solid rgba(239,68,68,0.2)',
+                      color: '#fca5a5',
+                    }}
                   >
-                    ✦ AI-Powered Insights
-                  </p>
-                  <p
-                    className="text-[11px] leading-relaxed"
-                    style={{ color: 'var(--color-text-subtle)' }}
-                  >
-                    Get contextual architecture analysis, scalability assessment, and personalized learning recommendations for your exact stack.
-                  </p>
-                </div>
+                    {error}
+                  </div>
+                )}
 
-                <AiAnalyzeButton
-                  onClick={handleAnalyze}
-                  status={status}
-                  cooldown={cooldown}
-                  disabled={analysis.isEmpty}
-                />
+                {/* Show result OR the analyze button */}
+                {status === 'success' && result ? (
+                  <AiAnalysisResult result={result} onReset={reset} />
+                ) : (
+                  <div className="space-y-3">
+                    <div
+                      className="rounded-xl p-3 text-center"
+                      style={{
+                        background: 'rgba(99,102,241,0.04)',
+                        border: '1px dashed rgba(99,102,241,0.2)',
+                      }}
+                    >
+                      <p
+                        className="text-xs font-medium mb-1"
+                        style={{ color: '#a5b4fc' }}
+                      >
+                        ✦ AI-Powered Insights
+                      </p>
+                      <p
+                        className="text-[11px] leading-relaxed"
+                        style={{ color: 'var(--color-text-subtle)' }}
+                      >
+                        Get contextual architecture analysis, scalability assessment, and personalized learning recommendations for your exact stack.
+                      </p>
+                    </div>
 
-                {cooldown && (
-                  <p
-                    className="text-[10px] text-center"
-                    style={{ color: 'var(--color-text-subtle)' }}
-                  >
-                    Next analysis available in 30s
-                  </p>
+                    <AiAnalyzeButton
+                      onClick={handleAnalyze}
+                      status={status}
+                      cooldown={cooldown}
+                      disabled={analysis.isEmpty}
+                    />
+
+                    {cooldown && (
+                      <p
+                        className="text-[10px] text-center"
+                        style={{ color: 'var(--color-text-subtle)' }}
+                      >
+                        Next analysis available in 30s
+                      </p>
+                    )}
+                  </div>
                 )}
               </div>
-            )}
-          </div>
+            </>
+          )}
 
         </div>
       )}

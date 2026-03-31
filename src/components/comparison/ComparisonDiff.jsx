@@ -1,6 +1,4 @@
 // src/components/comparison/ComparisonDiff.jsx
-import clsx from 'clsx'
-
 function DiffRow({ label, valueA, valueB }) {
   const same = valueA === valueB
   return (

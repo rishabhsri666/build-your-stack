@@ -15,7 +15,7 @@ import { useExport } from '../../hooks/useExport'
 
 export default function AppShell({ initialNodes = [], initialEdges = [], readOnly = false }) {
   const store = useStackStore(initialNodes, initialEdges)
-  const { save, saving, savedId, error, reset } = useSaveStack()
+  const { save, saving, savedId, error, remove } = useSaveStack()
   const { toasts, toast } = useToast()
   const canvasRef = useRef(null)
   const { exportPng, exporting } = useExport(canvasRef)
@@ -32,12 +32,30 @@ export default function AppShell({ initialNodes = [], initialEdges = [], readOnl
     setShowSaveModal(true)
   }
 
+  const handleDelete = async () => {
+    if (!savedId) {
+      toast.error('No stack saved yet.')
+      return
+    }
+    const confirmed = window.confirm('Delete this saved stack permanently?')
+    if (!confirmed) return
+
+    const deleted = await remove()
+    if (deleted) {
+      setShowShareModal(false)
+      toast.success('Saved stack deleted.')
+    } else {
+      toast.error('Failed to delete. Please try again.')
+    }
+  }
+
   const handleSaveConfirm = async (title) => {
+    const existing = !!savedId
     const id = await save({ title, nodes: store.nodes, edges: store.edges })
     if (id) {
       setShowSaveModal(false)
       setShowShareModal(true)
-      toast.success('Stack saved successfully!')
+      toast.success(existing ? 'Stack updated successfully!' : 'Stack saved successfully!')
     } else {
       toast.error('Failed to save. Please try again.')
     }
@@ -75,13 +93,15 @@ export default function AppShell({ initialNodes = [], initialEdges = [], readOnl
           onSave={handleSaveClick}
           onExport={handleExport}
           onTemplates={() => setShowTemplates(true)}
+          onDelete={handleDelete}
+          savedId={savedId}
           saving={saving}
           exporting={exporting}
           readOnly={readOnly}
         />
       </main>
 
-      <DetailsPanel nodes={store.nodes} edges={store.edges} />
+      <DetailsPanel nodes={store.nodes} edges={store.edges} readOnly={readOnly} />
 
       {/* Modals */}
       {showTemplates && (
@@ -99,7 +119,10 @@ export default function AppShell({ initialNodes = [], initialEdges = [], readOnl
         />
       )}
       {showShareModal && savedId && (
-        <ShareModal stackId={savedId} onClose={() => { setShowShareModal(false); reset() }} />
+        <ShareModal
+          stackId={savedId}
+          onClose={() => { setShowShareModal(false) }}
+        />
       )}
 
       <ToastContainer toasts={toasts} />

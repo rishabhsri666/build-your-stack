@@ -1,7 +1,6 @@
 // src/components/ui/TemplatesModal.jsx
 import { useState } from 'react'
 import { stackTemplates } from '../../data/stackTemplates'
-import clsx from 'clsx'
 
 export default function TemplatesModal({ onLoad, onClose }) {
   const [selected, setSelected] = useState(null)

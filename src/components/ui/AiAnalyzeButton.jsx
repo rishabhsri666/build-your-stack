@@ -1,5 +1,4 @@
 // src/components/ui/AiAnalyzeButton.jsx
-import clsx from 'clsx'
 
 export default function AiAnalyzeButton({ onClick, status, cooldown, disabled }) {
   const isLoading = status === 'loading'
